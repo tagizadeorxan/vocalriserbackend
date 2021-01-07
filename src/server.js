@@ -16,7 +16,7 @@ app.use(express.json());
 app.use(cors());
 // Enable pre-flight
 app.options("*", cors());
-console.log(process.env.PORT)
+
 const port = Number(process.env.PORT || 3331);
 
 app.use(`/api/v1/users`, userRouter);

@@ -99,7 +99,7 @@ class UserController {
 
     userLogin = async (req, res, next) => {
         this.checkValidation(req);
-console.log(req.body)
+
         let { email, password: pass } = req.body;
    
         const user = await UserModel.findOne({ email });
