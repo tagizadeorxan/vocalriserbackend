@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "dev": "nodemon"
   },
+  "proxy":"http://localhost:3000",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/tagizadeorxan/vocalriserbackend.git"
