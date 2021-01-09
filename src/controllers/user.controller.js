@@ -11,7 +11,7 @@ dotenv.config();
  ******************************************************************************/
 class UserController {
     getAllUsers = async (req, res, next) => {
-        let userList = await UserModel.find();
+        let userList = await UserModel.find({active:1});
         if (!userList.length) {
             throw new HttpException(404, 'Users not found');
         }
@@ -25,7 +25,7 @@ class UserController {
     };
 
     getUserById = async (req, res, next) => {
-        const user = await UserModel.findOne({ id: req.params.id });
+        const user = await UserModel.findOne({ id: req.params.id,active:1 });
         if (!user) {
             throw new HttpException(404, 'User not found');
         }
@@ -36,7 +36,7 @@ class UserController {
     };
 
     getUserByuserName = async (req, res, next) => {
-        const user = await UserModel.findOne({ username: req.params.username });
+        const user = await UserModel.findOne({ username: req.params.username,active:1 });
         if (!user) {
             throw new HttpException(404, 'User not found');
         }
@@ -47,6 +47,7 @@ class UserController {
     };
 
     getCurrentUser = async (req, res, next) => {
+      
         const { password, ...userWithoutPassword } = req.currentUser;
 
         res.send(userWithoutPassword);
@@ -103,12 +104,29 @@ class UserController {
     };
 
     deleteUser = async (req, res, next) => {
-        const result = await UserModel.delete(req.params.id);
+       const update = {
+           active:0
+       }
+        const result = await UserModel.update(update,req.params.id);
         if (!result) {
             throw new HttpException(404, 'User not found');
         }
         res.send('User has been deleted');
     };
+
+
+
+    lockUser = async (req, res, next) => {
+        const update = {
+            active:2
+        }
+ 
+         const result = await UserModel.update(update,req.params.id);
+         if (!result) {
+             throw new HttpException(404, 'User not found');
+         }
+         res.send('User has been locked');
+     };
 
     userLogin = async (req, res, next) => {
         this.checkValidation(req);
@@ -116,11 +134,16 @@ class UserController {
         let { email, password: pass } = req.body;
    
         const user = await UserModel.findOne({ email });
+        
+       
 
         if (!user) {
             throw new HttpException(401, 'Unable to login!');
         }
      
+        if(user.active === 0 || user.active ===2){
+            throw new HttpException(401, 'Account is not active');
+        }
 
          const isMatch = await bcrypt.compare(pass, user.password);
        

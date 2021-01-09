@@ -29,11 +29,12 @@ class UserModel {
         return result[0];
     }
 
-    create = async ({ username, password, first_name, last_name, email, role = Role.SuperUser, age }) => {
+    create = async ({ username, password, first_name, last_name, email, role = Role.SuperUser, age, gender,type }) => {
         const sql = `INSERT INTO ${this.tableName}
-        (username, password, first_name, last_name, email, role, age) VALUES (?,?,?,?,?,?,?)`;
+        (username, password, first_name, last_name, email, role, age, gender,type) VALUES (?,?,?,?,?,?,?,?,?)`;
 
-        const result = await query(sql, [username, password, first_name, last_name, email, role, age]);
+        const result = await query(sql, [username, password, first_name, last_name, email, role, age, gender,type]);
+
         const affectedRows = result ? result.affectedRows : 0;
 
         return affectedRows;
@@ -42,7 +43,7 @@ class UserModel {
     update = async (params, id) => {
         const { columnSet, values } = multipleColumnSet(params)
 
-        const sql = `UPDATE user SET ${columnSet} WHERE id = ?`;
+        const sql = `UPDATE users SET ${columnSet} WHERE id = ?`;
 
         const result = await query(sql, [...values, id]);
 
