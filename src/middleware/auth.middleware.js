@@ -5,6 +5,7 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const auth = (...roles) => {
+    
     return async function (req, res, next) {
         try {
             const authHeader = req.headers.authorization;

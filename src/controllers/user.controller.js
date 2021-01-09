@@ -55,6 +55,19 @@ class UserController {
     createUser = async (req, res, next) => {
         this.checkValidation(req);
 
+        const email = await UserModel.findOne({email:req.body.email})
+
+        if(email) {
+            throw new HttpException(409, 'This email is already registered');
+        }
+
+        
+        const username = await UserModel.findOne({username:req.body.username})
+        if(username) {
+            throw new HttpException(409, 'This username already exists');
+        }
+
+  
         await this.hashPassword(req);
 
         const result = await UserModel.create(req.body);
@@ -109,9 +122,9 @@ class UserController {
         }
      
 
-        // const isMatch = await bcrypt.compare(pass, user.password);
+         const isMatch = await bcrypt.compare(pass, user.password);
        
-        if (!(user.password===pass)) {
+        if (!isMatch) {
             throw new HttpException(401, 'Incorrect password!');
         }
 

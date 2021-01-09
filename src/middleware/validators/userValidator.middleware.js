@@ -26,8 +26,7 @@ exports.createUserSchema = [
         .exists()
         .withMessage('Email is required')
         .isEmail()
-        .withMessage('Must be a valid email')
-        .normalizeEmail(),
+        .withMessage('Must be a valid email'),
     check('role')
         .optional()
         .isIn([Role.Admin, Role.SuperUser])
@@ -70,8 +69,7 @@ exports.updateUserSchema = [
     check('email')
         .optional()
         .isEmail()
-        .withMessage('Must be a valid email')
-        .normalizeEmail(),
+        .withMessage('Must be a valid email'),
     check('role')
         .optional()
         .isIn([Role.Admin, Role.SuperUser])
