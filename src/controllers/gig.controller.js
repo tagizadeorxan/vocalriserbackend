@@ -1,54 +1,74 @@
-const UserModel = require('../models/user.model.js');
+const GigModel = require('../models/gig.model');
 const HttpException = require('../utils/HttpException.utils');
 const { validationResult } = require('express-validator');
-const Verify = require('../utils/verify')
+const Utils = require('../utils/helpers.utils');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
 
 /******************************************************************************
- *                              User Controller
+ *                              Gig Controller
  ******************************************************************************/
-const nodemailer = require('nodemailer');
+class GigController {
 
-const transporter = nodemailer.createTransport({
-    service:'gmail',
-    auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASSWORD
-    }
-});
+    createGig = async (req, res, next) => {
 
+        this.checkValidation(req);
 
+        const result = await GigModel.create(req.body);
 
-class UserController {
-
-
-    getAllUsers = async (req, res, next) => {
-        let userList = await UserModel.find({active:1});
-        if (!userList.length) {
-            throw new HttpException(404, 'Users not found');
+        if (!result) {
+            throw new HttpException(500, 'Something went wrong');
         }
 
-        userList = userList.map(user => {
-            const { password, ...userWithoutPassword } = user;
-            return userWithoutPassword;
+        res.status(201).send('Gig was created!');
+    };
+
+
+    getAllGigs = async (req, res, next) => {
+      let gigList;
+
+     if(req.params.type === Utils.Both) {
+        gigList = await GigModel.find({active:1,gender:req.params.gender});
+     } else {
+        gigList = await GigModel.find({active:1,type:req.params.type,gender:req.params.gender});
+     }
+        
+        if (!gigList.length) {
+            throw new HttpException(404, 'Gig not found');
+        }
+
+        gigList = gigList.map(gig => {
+            // const { password, ...userWithoutPassword } = gig;
+            return gig;
         });
 
-        res.send(userList);
+        res.send(gigList);
     };
 
-    getUserById = async (req, res, next) => {
-        const user = await UserModel.findOne({ id: req.params.id,active:1});
-        if (!user) {
-            throw new HttpException(404, 'User not found');
+    getGigByID = async (req, res, next) => {
+        const gig = await GigModel.findOne({ id: req.params.id,active:1});
+        if (!gig) {
+            throw new HttpException(404, 'Gig not found');
         }
 
-        const { password, ...userWithoutPassword } = user;
+        // const { password, ...userWithoutPassword } = gig;
 
-        res.send(userWithoutPassword);
+        res.send(gig);
     };
+
+    getGigbyUserID = async (req, res, next) => {
+        const gig = await GigModel.findOne({ user_id:req.params.id,active:1});
+        if (!gig) {
+            throw new HttpException(404, 'Gig not found');
+        }
+
+        // const { password, ...userWithoutPassword } = gig;
+
+        res.send(gig);
+    };
+
 
     getUserByuserName = async (req, res, next) => {
         const user = await UserModel.findOne({ username: req.params.username,active:1 });
@@ -91,27 +111,8 @@ class UserController {
         if (!result) {
             throw new HttpException(500, 'Something went wrong');
         }
-      console.log(req.body.password)
-      console.log(req.body.password.replace("[^a-zA-Z]",""))
+
         res.status(201).send('User was created!');
-       
-        let mailOptions = {
-            from: process.env.GMAIL_USER,
-            to: req.body.email,
-            subject: 'You registered successfully',
-            text: 'That was easy!',
-            html: Verify.confirmEmail(req.body.password.replace(/\//g, "slash"))
-          };
-          
-          transporter.sendMail(mailOptions, function(error, info){
-            if (error) {
-              console.log(error);
-            } else {
-              console.log('Email sent: ' + info.response);
-            }
-          });
-
-
     };
 
     updateUser = async (req, res, next) => {
@@ -148,18 +149,7 @@ class UserController {
         res.send('User has been deleted');
     };
 
- 
-    confirmUser = async (req, res, next) => {
-        const update = {
-            active:1
-        }
-       
-         const result = await UserModel.confirm(update,req.params.token.replace(/slash/g, "/"));
-         if (!result) {
-             throw new HttpException(404, 'User not found');
-         }
-         res.send('User confirmed');
-     };
+
 
     lockUser = async (req, res, next) => {
         const update = {
@@ -186,11 +176,8 @@ class UserController {
             throw new HttpException(401, 'Unable to login!');
         }
      
-        if(user.active === 0 || user.active === 2){
+        if(user.active === 0 || user.active ===2){
             throw new HttpException(401, 'Account is not active');
-        }
-        if(user.active === 3) {
-           throw new HttpException(401, 'Your email is not activated please check your email')
         }
 
          const isMatch = await bcrypt.compare(pass, user.password);
@@ -230,4 +217,4 @@ class UserController {
 /******************************************************************************
  *                               Export
  ******************************************************************************/
-module.exports = new UserController;
+module.exports = new GigController;

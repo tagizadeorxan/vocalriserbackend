@@ -27,10 +27,6 @@ exports.createUserSchema = [
         .withMessage('Email is required')
         .isEmail()
         .withMessage('Must be a valid email'),
-    check('role')
-        .optional()
-        .isIn([Role.Admin, Role.SuperUser])
-        .withMessage('Invalid Role type'),
     check('password')
         .exists()
         .withMessage('Password is required')
