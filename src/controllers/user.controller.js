@@ -1,7 +1,7 @@
 const UserModel = require('../models/user.model.js');
 const HttpException = require('../utils/HttpException.utils');
 const { validationResult } = require('express-validator');
-const Verify = require('../utils/verify')
+const Utils = require('../utils/helpers.utils');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
@@ -10,15 +10,6 @@ dotenv.config();
 /******************************************************************************
  *                              User Controller
  ******************************************************************************/
-const nodemailer = require('nodemailer');
-
-const transporter = nodemailer.createTransport({
-    service:'gmail',
-    auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_PASSWORD
-    }
-});
 
 
 
@@ -91,25 +82,16 @@ class UserController {
         if (!result) {
             throw new HttpException(500, 'Something went wrong');
         }
-      console.log(req.body.password)
-      console.log(req.body.password.replace("[^a-zA-Z]",""))
+        const user = await UserModel.findOne({email:req.body.email})
+
         res.status(201).send('User was created!');
-       
-        let mailOptions = {
-            from: process.env.GMAIL_USER,
-            to: req.body.email,
-            subject: 'You registered successfully',
-            text: 'That was easy!',
-            html: Verify.confirmEmail(req.body.password.replace(/\//g, "slash"))
-          };
-          
-          transporter.sendMail(mailOptions, function(error, info){
-            if (error) {
-              console.log(error);
-            } else {
-              console.log('Email sent: ' + info.response);
-            }
-          });
+   
+        const secretKey = process.env.SECRET_JWT || "";
+        const token = jwt.sign({ user_id:user.id.toString()}, secretKey, {
+            expiresIn: '24h'
+        });
+ 
+        Utils.MailSender(req.body.email,token)
 
 
     };
@@ -153,12 +135,23 @@ class UserController {
         const update = {
             active:1
         }
-       
-         const result = await UserModel.confirm(update,req.params.token.replace(/slash/g, "/"));
-         if (!result) {
-             throw new HttpException(404, 'User not found');
-         }
-         res.send('User confirmed');
+        
+        const secretKey = process.env.SECRET_JWT || "";
+
+        // Verify Token
+       jwt.verify(req.params.token, secretKey, async (err,decoded)=>{
+           if(err) {
+              res.send("your session is expired")
+           } else{
+            const result = await UserModel.confirm(update,decoded.user_id);
+            if (!result) {
+                throw new HttpException(404, 'User not found');
+            }
+            res.send('User confirmed');
+           }
+        });
+    
+        
      };
 
     lockUser = async (req, res, next) => {
@@ -190,7 +183,14 @@ class UserController {
             throw new HttpException(401, 'Account is not active');
         }
         if(user.active === 3) {
-           throw new HttpException(401, 'Your email is not activated please check your email')
+            const secretKey = process.env.SECRET_JWT || "";
+        const token = jwt.sign({ user_id: user.id.toString() }, secretKey, {
+            expiresIn: '24h'
+        });
+  
+        Utils.MailSender(req.body.email,token)
+
+           throw new HttpException(401, 'Your email is not activated please check your email with 24 hours, we sent email to you again')
         }
 
          const isMatch = await bcrypt.compare(pass, user.password);

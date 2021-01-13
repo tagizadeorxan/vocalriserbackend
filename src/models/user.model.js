@@ -18,9 +18,9 @@ class UserModel {
     }
 
     findOne = async (params) => {
-     
+
         const { columnSet, values } = multipleColumnSet(params)
-    
+
         const sql = `SELECT * FROM ${this.tableName}
         WHERE ${columnSet}`;
 
@@ -30,11 +30,11 @@ class UserModel {
         return result[0];
     }
 
-    create = async ({ username, password, first_name, last_name, email, age, gender,type }) => {
+    create = async ({ username, password, first_name, last_name, email, age, gender, type }) => {
         const sql = `INSERT INTO ${this.tableName}
         (username, password, first_name, last_name, email, role, age, gender,type) VALUES (?,?,?,?,?,?,?,?,?)`;
 
-        const result = await query(sql, [username, password, first_name, last_name, email, Role.User, age, gender,type]);
+        const result = await query(sql, [username, password, first_name, last_name, email, Role.User, age, gender, type]);
 
         const affectedRows = result ? result.affectedRows : 0;
 
@@ -51,12 +51,12 @@ class UserModel {
         return result;
     }
 
-    confirm = async (params, password) => {
+    confirm = async (params, id) => {
         const { columnSet, values } = multipleColumnSet(params)
 
-        const sql = `UPDATE users SET ${columnSet} WHERE password = ?`;
+        const sql = `UPDATE users SET ${columnSet} WHERE id = ?`;
 
-        const result = await query(sql, [...values, password]);
+        const result = await query(sql, [...values, id]);
 
         return result;
     }

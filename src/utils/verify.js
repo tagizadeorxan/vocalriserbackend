@@ -1,10 +1,10 @@
-const confirmEmail = (hash) => {
+const confirmEmail = (token) => {
 
     const timeElapsed = Date.now();
     const today = new Date(timeElapsed);
 
-    console.log(hash)
-    const url = `http://localhost:3000/api/v1/users/confirmation/${hash}`
+    console.log(token)
+    const url = `https://vocalriser.herokuapp.com/api/v1/users/confirmation/${token}`
     let html = `<div style="  text-align: center;">
     <h1>Vocalriser</h1>
       <div>
@@ -25,7 +25,7 @@ const confirmEmail = (hash) => {
                    
        <p>${today.toUTCString()}</p>
         </div>`
-        return html;
+    return html;
 }
 
 
