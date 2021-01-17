@@ -1,5 +1,6 @@
 const { body, check } = require('express-validator');
 const Role = require('../../utils/userRoles.utils');
+const Utils = require('../../utils/helpers.utils')
 
 
 exports.createUserSchema = [
@@ -7,21 +8,21 @@ exports.createUserSchema = [
         .exists()
         .withMessage('username is required')
         .isLength({ min: 3 })
-        .withMessage('Must be at least 3 chars long'),
+        .withMessage('Username must be at least 3 chars long'),
     check('first_name')
         .exists()
         .withMessage('Your first name is required')
         .isAlpha()
-        .withMessage('Must be only alphabetical chars')
+        .withMessage('First name must be only alphabetical chars')
         .isLength({ min: 3 })
-        .withMessage('Must be at least 3 chars long'),
+        .withMessage('First name must be at least 3 chars long'),
     check('last_name')
         .exists()
         .withMessage('Your last name is required')
         .isAlpha()
-        .withMessage('Must be only alphabetical chars')
+        .withMessage('Last name must be only alphabetical chars')
         .isLength({ min: 3 })
-        .withMessage('Must be at least 3 chars long'),
+        .withMessage('Last Name must be at least 3 chars long'),
     check('email')
         .exists()
         .withMessage('Email is required')
@@ -31,18 +32,32 @@ exports.createUserSchema = [
         .exists()
         .withMessage('Password is required')
         .notEmpty()
+        .withMessage('Password is required')
         .isLength({ min: 6 })
         .withMessage('Password must contain at least 6 characters')
         .isLength({ max: 10 })
         .withMessage('Password can contain max 10 characters'),
     check('confirm_password')
         .exists()
+        .withMessage('Password is required')
         .custom((value, { req }) => value === req.body.password)
         .withMessage('confirm_password field must have the same value as the password field'),
     check('age')
-        .optional()
+        .exists()
+        .withMessage('age is required')
         .isNumeric()
-        .withMessage('Must be a number')
+        .withMessage('age must be a number'),
+    check('gender')
+        .exists()
+        .withMessage('gender is required')
+        .isIn([Utils.Male, Utils.Female])
+        .withMessage('Gender is not correct'),
+    check('type')
+        .exists()
+        .withMessage('type is required')
+        .isIn([Utils.Producer, Utils.Vocalist, Utils.Both])
+        .withMessage('type is not correct')
+
 ];
 
 exports.updateUserSchema = [
@@ -106,7 +121,7 @@ exports.validateLogin = [
         .withMessage('Email is required')
         .isEmail()
         .withMessage('Must be a valid email')
-        ,
+    ,
     check('password')
         .exists()
         .withMessage('Password is required')

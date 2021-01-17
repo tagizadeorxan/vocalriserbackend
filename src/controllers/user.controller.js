@@ -1,4 +1,5 @@
 const UserModel = require('../models/user.model.js');
+const TrackModel = require('../models/track.model.js');
 const HttpException = require('../utils/HttpException.utils');
 const { validationResult } = require('express-validator');
 const Utils = require('../utils/helpers.utils');
@@ -14,6 +15,16 @@ dotenv.config();
 
 
 class UserController {
+    
+
+    getAllTracks = async (req, res, next) => {
+        let trackList = await TrackModel.find();
+        if (!trackList.length) {
+            throw new HttpException(404, 'Users not found');
+        }
+        res.send(trackList);
+    };
+
 
 
     getAllUsers = async (req, res, next) => {
@@ -52,6 +63,45 @@ class UserController {
         res.send(userWithoutPassword);
     };
 
+    getVocalists = async (req, res, next) => {
+        
+        const vocalists = await UserModel.find({type: Utils.Vocalist,active:1 });
+        const both = await UserModel.find({type:Utils.Both, active:1})
+        
+        if (!vocalists || !both) {
+            throw new HttpException(404, 'User not found');
+        }
+        const all = both.concat(vocalists)
+
+        let userList = all.map(user => {
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        });
+
+
+        res.send(userList);
+    };
+    
+
+
+
+    getProducers = async (req, res, next) => {
+        const producers = await UserModel.find({ type: Utils.Producer || Utils.Both,active:1 });
+        const both = await UserModel.find({type:Utils.Both, active:1})
+        if (!producers || !both) {
+            throw new HttpException(404, 'User not found');
+        }
+        const all = both.concat(producers)
+
+        let userList = all.map(user => {
+            const { password, ...userWithoutPassword } = user;
+            return userWithoutPassword;
+        });
+
+        res.send(userList);
+    };
+
+
     getCurrentUser = async (req, res, next) => {
       
         const { password, ...userWithoutPassword } = req.currentUser;
@@ -60,7 +110,7 @@ class UserController {
     };
 
     createUser = async (req, res, next) => {
-        this.checkValidation(req);
+        this.checkValidation(req,res);
 
         const email = await UserModel.findOne({email:req.body.email})
 
@@ -80,11 +130,11 @@ class UserController {
         const result = await UserModel.create(req.body);
 
         if (!result) {
-            throw new HttpException(500, 'Something went wrong');
+            throw new HttpException(409, 'Something went wrong');
         }
         const user = await UserModel.findOne({email:req.body.email})
 
-        res.status(201).send('User was created!');
+        res.status(201).json('User was created!');
    
         const secretKey = process.env.SECRET_JWT || "";
         const token = jwt.sign({ user_id:user.id.toString()}, secretKey, {
@@ -190,7 +240,7 @@ class UserController {
   
         Utils.MailSender(req.body.email,token)
 
-           throw new HttpException(401, 'Your email is not activated please check your email with 24 hours, we sent email to you again')
+           throw new HttpException(401, 'Your email is not activated please check your email within 24 hours, we sent email to you again')
         }
 
          const isMatch = await bcrypt.compare(pass, user.password);
@@ -210,10 +260,12 @@ class UserController {
         res.send({ ...userWithoutPassword, token });
     };
 
-    checkValidation = (req) => {
+    checkValidation = (req,res) => {
         const errors = validationResult(req)
+      
         if (!errors.isEmpty()) {
-            throw new HttpException(400, 'Validation faild', errors);
+            console.log(errors.errors)
+            throw new HttpException(400, `Validation failed`,errors.errors);
         }
     }
 

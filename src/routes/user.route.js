@@ -17,6 +17,13 @@ router.patch('/id/:id', auth(Role.Admin), updateUserSchema, awaitHandlerFactory(
 router.delete('/id/:id', auth(Role.Admin), awaitHandlerFactory(userController.deleteUser)); // localhost:3000/api/v1/users/id/1
 router.lock('/id/:id', auth(Role.Admin), awaitHandlerFactory(userController.lockUser)); // localhost:3000/api/v1/users/id/1
 router.get('/confirmation/:token', awaitHandlerFactory(userController.confirmUser)); // localhost:3000/api/v1/users/id/1
+router.get('/vocalists',auth() ,awaitHandlerFactory(userController.getVocalists));
+router.get('/producers',auth() ,awaitHandlerFactory(userController.getProducers));
+
+
+
+//tracks
+router.get('/tracks',auth() ,awaitHandlerFactory(userController.getAllTracks));
 
 
 router.post('/login', validateLogin, awaitHandlerFactory(userController.userLogin)); // localhost:3000/api/v1/users/login
