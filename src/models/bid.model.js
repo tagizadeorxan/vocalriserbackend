@@ -1,8 +1,8 @@
 const query = require('../db/db-connection');
-const { multipleColumnSet, multipleUpdateSet } = require('../utils/common.utils');
+const { multipleColumnSet } = require('../utils/common.utils');
 const Role = require('../utils/userRoles.utils');
-class GigModel {
-    tableName = 'gigs';
+class BidModel {
+    tableName = 'bids';
 
     find = async (params = {}) => {
         let sql = `SELECT * FROM ${this.tableName}`;
@@ -30,32 +30,21 @@ class GigModel {
         return result[0];
     }
 
-    create = async ({ user_id, name, expireDate, createDate, budgetMin, budgetMax, gender, type }) => {
+    create = async ({ gig_id, user_id, amount, full_name, track_url, track_title,soundslike }) => {
         const sql = `INSERT INTO ${this.tableName}
-        (user_id, name, expireDate, createDate, budgetMin, budgetMax, gender,type) VALUES (?,?,?,?,?,?,?,?)`;
+        (gig_id, user_id, amount, full_name, track_url, track_title,soundslike) VALUES (?,?,?,?,?,?,?)`;
 
-        const result = await query(sql, [user_id, name, expireDate, createDate, budgetMin, budgetMax, gender, type]);
-
+        const result = await query(sql, [gig_id, user_id, amount, full_name, track_url, track_title,soundslike]);
+        
         const affectedRows = result ? result.affectedRows : 0;
-
+        
         return affectedRows;
     }
 
     update = async (params, id) => {
         const { columnSet, values } = multipleColumnSet(params)
 
-        const sql = `UPDATE gigs SET ${columnSet} WHERE id = ?`;
-
-        const result = await query(sql, [...values, id]);
-
-        return result;
-
-    }
-
-    multipleUpdate = async (params, id) => {
-        const { columnSet, values } = multipleUpdateSet(params)
-
-        const sql = `UPDATE gigs SET ${columnSet} WHERE id = ?`;
+        const sql = `UPDATE bids SET ${columnSet} WHERE id = ?`;
 
         const result = await query(sql, [...values, id]);
 
@@ -72,4 +61,4 @@ class GigModel {
     }
 }
 
-module.exports = new GigModel;
+module.exports = new BidModel;

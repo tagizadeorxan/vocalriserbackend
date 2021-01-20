@@ -1,4 +1,5 @@
 const GigModel = require('../models/gig.model');
+const BidModel = require('../models/bid.model');
 const HttpException = require('../utils/HttpException.utils');
 const { validationResult } = require('express-validator');
 const Utils = require('../utils/helpers.utils');
@@ -27,14 +28,14 @@ class GigController {
 
 
     getAllGigs = async (req, res, next) => {
-      let gigList;
+        let gigList;
 
-     if(req.params.type === Utils.Both) {
-        gigList = await GigModel.find({active:1,gender:req.params.gender});
-     } else {
-        gigList = await GigModel.find({active:1,type:req.params.type,gender:req.params.gender});
-     }
-        
+        if (req.params.type === Utils.Both) {
+            gigList = await GigModel.find({ active: 1, gender: req.params.gender });
+        } else {
+            gigList = await GigModel.find({ active: 1, type: req.params.type, gender: req.params.gender });
+        }
+
         if (!gigList.length) {
             throw new HttpException(404, 'Gig not found');
         }
@@ -48,7 +49,7 @@ class GigController {
     };
 
     getGigByID = async (req, res, next) => {
-        const gig = await GigModel.findOne({ id: req.params.id,active:1});
+        const gig = await GigModel.findOne({ id: req.params.id });
         if (!gig) {
             throw new HttpException(404, 'Gig not found');
         }
@@ -59,7 +60,7 @@ class GigController {
     };
 
     getGigbyUserID = async (req, res, next) => {
-        const gig = await GigModel.findOne({ user_id:req.params.id,active:1});
+        const gig = await GigModel.findOne({ user_id: req.params.id, active: 1 });
         if (!gig) {
             throw new HttpException(404, 'Gig not found');
         }
@@ -70,131 +71,78 @@ class GigController {
     };
 
 
-    getUserByuserName = async (req, res, next) => {
-        const user = await UserModel.findOne({ username: req.params.username,active:1 });
-        if (!user) {
-            throw new HttpException(404, 'User not found');
+
+    getBidsByGigID = async (req, res, next) => {
+        const bids = await BidModel.find({ gig_id: req.params.id });
+        if (!bids.length) {
+            throw new HttpException(404, 'Bid not found');
         }
 
-        const { password, ...userWithoutPassword } = user;
-
-        res.send(userWithoutPassword);
+        res.send(bids);
     };
 
-    getCurrentUser = async (req, res, next) => {
-      
-        const { password, ...userWithoutPassword } = req.currentUser;
+    
+    getBidExist = async (req, res, next) => {
+        const bid = await BidModel.find({ user_id: req.params.id });
+        if (!bid.length) {
+            throw new HttpException(404, 'Bid not found');
+        }
 
-        res.send(userWithoutPassword);
+        res.send(bid);
     };
 
-    createUser = async (req, res, next) => {
-        this.checkValidation(req);
 
-        const email = await UserModel.findOne({email:req.body.email})
 
-        if(email) {
-            throw new HttpException(409, 'This email is already registered');
-        }
+    closeGigByID = async (req, res, next) => {
 
-        
-        const username = await UserModel.findOne({username:req.body.username})
-        if(username) {
-            throw new HttpException(409, 'This username already exists');
-        }
-
-  
-        await this.hashPassword(req);
-
-        const result = await UserModel.create(req.body);
-
+        const result = await GigModel.update({ active: 0 }, req.params.id);
         if (!result) {
-            throw new HttpException(500, 'Something went wrong');
+            throw new HttpException(404, 'Problem while updating');
         }
+        console.log(result)
 
-        res.status(201).send('User was created!');
+        res.send(result);
     };
 
-    updateUser = async (req, res, next) => {
-        this.checkValidation(req);
 
-        await this.hashPassword(req);
 
-        const { confirm_password, ...restOfUpdates } = req.body;
+    awardGigByID = async (req, res, next) => {
 
-        // do the update query and get the result
-        // it can be partial edit
-        const result = await UserModel.update(restOfUpdates, req.params.id);
+        let update = {
+            active: 2,
+            awardedUser: 66
+        }
 
+
+        const result = await GigModel.multipleUpdate(update, req.params.id);
         if (!result) {
-            throw new HttpException(404, 'Something went wrong');
+            throw new HttpException(404, 'Problem while updating');
         }
 
-        const { affectedRows, changedRows, info } = result;
+        console.log(result)
 
-        const message = !affectedRows ? 'User not found' :
-            affectedRows && changedRows ? 'User updated successfully' : 'Updated faild';
-
-        res.send({ message, info });
+        res.send(result);
     };
 
-    deleteUser = async (req, res, next) => {
-       const update = {
-           active:0
-       }
-        const result = await UserModel.update(update,req.params.id);
+
+    deleteBid = async (req, res, next) => {
+
+        const result = await BidModel.delete(req.params.id);
         if (!result) {
-            throw new HttpException(404, 'User not found');
+            throw new HttpException(404, 'Bid not found');
         }
-        res.send('User has been deleted');
+        res.send('Bid has been deleted');
     };
 
 
 
-    lockUser = async (req, res, next) => {
-        const update = {
-            active:2
+    submitBid = async (req, res, next) => {
+        console.log("okdir")
+        const result = await BidModel.create(req.body);
+        if (!result) {
+            throw new HttpException(404, 'Error while creating');
         }
- 
-         const result = await UserModel.update(update,req.params.id);
-         if (!result) {
-             throw new HttpException(404, 'User not found');
-         }
-         res.send('User has been locked');
-     };
-
-    userLogin = async (req, res, next) => {
-        this.checkValidation(req);
-
-        let { email, password: pass } = req.body;
-   
-        const user = await UserModel.findOne({ email });
-        
-       
-
-        if (!user) {
-            throw new HttpException(401, 'Unable to login!');
-        }
-     
-        if(user.active === 0 || user.active ===2){
-            throw new HttpException(401, 'Account is not active');
-        }
-
-         const isMatch = await bcrypt.compare(pass, user.password);
-       
-        if (!isMatch) {
-            throw new HttpException(401, 'Incorrect password!');
-        }
-
-        // user matched!
-        const secretKey = process.env.SECRET_JWT || "";
-        const token = jwt.sign({ user_id: user.id.toString() }, secretKey, {
-            expiresIn: '24h'
-        });
-
-        const { password, ...userWithoutPassword } = user;
-
-        res.send({ ...userWithoutPassword, token });
+        res.send('Successfully added');
     };
 
     checkValidation = (req) => {

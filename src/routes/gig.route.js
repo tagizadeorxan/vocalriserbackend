@@ -14,5 +14,11 @@ router.get('/getGigs/:type/:gender', auth(), awaitHandlerFactory(gigController.g
 router.get('/getGig/:id', auth(), awaitHandlerFactory(gigController.getGigByID)); 
 router.get('/getGigbyUserID/:id', auth(), awaitHandlerFactory(gigController.getGigbyUserID)); 
 router.post('/createGig', auth(), createGigSchema, awaitHandlerFactory(gigController.createGig)); 
+router.get('/getBidsByGigID/:id', auth(), awaitHandlerFactory(gigController.getBidsByGigID)); 
+router.delete('/removeBid/:id', auth(), awaitHandlerFactory(gigController.deleteBid)); 
+router.post('/submitBid', auth(), awaitHandlerFactory(gigController.submitBid));
+router.post('/closeGigByID/:id', auth(), awaitHandlerFactory(gigController.closeGigByID));
+router.post('/awardGigByID/:id', auth(), awaitHandlerFactory(gigController.awardGigByID));
+router.get('/bidExist/:id', auth(), awaitHandlerFactory(gigController.getBidExist)); 
 
 module.exports = router;
