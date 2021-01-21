@@ -12,8 +12,8 @@ exports.createGigSchema = [
    check('name')
    .exists()
    .withMessage('name required')
-   .isLength({min:2})
-   .withMessage('name string must be more than 1 letter'),
+   .isLength({min:5})
+   .withMessage('name string must be more than 5 letter'),
    check('expireDate')
    .exists()
    .withMessage('expire date required')

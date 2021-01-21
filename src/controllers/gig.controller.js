@@ -1,5 +1,8 @@
 const GigModel = require('../models/gig.model');
 const BidModel = require('../models/bid.model');
+const CardModel = require('../models/cards.model')
+const languages = require('../utils/languages.utils')
+const genres = require('../utils/genres.utils')
 const HttpException = require('../utils/HttpException.utils');
 const { validationResult } = require('express-validator');
 const Utils = require('../utils/helpers.utils');
@@ -48,6 +51,39 @@ class GigController {
         res.send(gigList);
     };
 
+    getCreatorGigsByUserID = async (req, res, next) => {
+        let giglist;
+
+        giglist = await GigModel.find({ user_id: req.params.id })
+        if (!giglist.length) {
+            throw new HttpException(404, 'Gig not found');
+        }
+
+        res.send(giglist);
+    }
+
+    getBidderSuccessfullGigsByUserID = async (req, res, next) => {
+        let giglist;
+
+        giglist = await GigModel.find({ awardedUser: req.params.id, active:2 })
+        if (!giglist.length) {
+            throw new HttpException(404, 'Gig not found');
+        }
+console.log(giglist)
+        res.send(giglist);
+    }
+
+
+
+
+
+    getLanguages = async (req, res, next) => {
+        res.send(languages)
+    }
+    getGenres = async (req, res, next) => {
+        res.send(genres)
+    }
+
     getGigByID = async (req, res, next) => {
         const gig = await GigModel.findOne({ id: req.params.id });
         if (!gig) {
@@ -72,6 +108,19 @@ class GigController {
 
 
 
+
+    getCards = async (req, res, next) => {
+        let cards;
+
+        cards = await CardModel.find();
+
+        if (!cards.length) {
+            throw new HttpException(404, 'Gig not found');
+        }
+
+        res.send(cards);
+    };
+
     getBidsByGigID = async (req, res, next) => {
         const bids = await BidModel.find({ gig_id: req.params.id });
         if (!bids.length) {
@@ -81,7 +130,7 @@ class GigController {
         res.send(bids);
     };
 
-    
+
     getBidExist = async (req, res, next) => {
         const bid = await BidModel.find({ user_id: req.params.id });
         if (!bid.length) {
@@ -110,6 +159,7 @@ class GigController {
 
         let update = {
             active: 2,
+            progress: 0,
             awardedUser: 66
         }
 
@@ -120,6 +170,39 @@ class GigController {
         }
 
         console.log(result)
+
+        res.send(result);
+    };
+
+
+
+
+
+    acceptGigByID = async (req, res, next) => {
+
+        let update = {
+            progress: 1
+        }
+
+        const result = await GigModel.multipleUpdate(update, req.params.id);
+        if (!result) {
+            throw new HttpException(404, 'Problem while updating');
+        }
+
+        res.send(result);
+    };
+
+
+    completeGigByID = async (req, res, next) => {
+
+        let update = {
+            progress: 2
+        }
+
+        const result = await GigModel.multipleUpdate(update, req.params.id);
+        if (!result) {
+            throw new HttpException(404, 'Problem while updating');
+        }
 
         res.send(result);
     };

@@ -30,11 +30,11 @@ class GigModel {
         return result[0];
     }
 
-    create = async ({ user_id, name, expireDate, createDate, budgetMin, budgetMax, gender, type }) => {
+    create = async ({ user_id, name, expireDate, createDate, budgetMin, budgetMax, gender, type,track_url,bpm,requirements,genre,language,createdBy }) => {
         const sql = `INSERT INTO ${this.tableName}
-        (user_id, name, expireDate, createDate, budgetMin, budgetMax, gender,type) VALUES (?,?,?,?,?,?,?,?)`;
+        (user_id, name, expireDate, createDate, budgetMin, budgetMax, gender,type,track_url,bpm,requirements,genre,language,createdBy) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`;
 
-        const result = await query(sql, [user_id, name, expireDate, createDate, budgetMin, budgetMax, gender, type]);
+        const result = await query(sql, [user_id, name, expireDate, createDate, budgetMin, budgetMax, gender, type,track_url,bpm,requirements,genre,language,createdBy]);
 
         const affectedRows = result ? result.affectedRows : 0;
 

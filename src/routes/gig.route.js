@@ -20,5 +20,12 @@ router.post('/submitBid', auth(), awaitHandlerFactory(gigController.submitBid));
 router.post('/closeGigByID/:id', auth(), awaitHandlerFactory(gigController.closeGigByID));
 router.post('/awardGigByID/:id', auth(), awaitHandlerFactory(gigController.awardGigByID));
 router.get('/bidExist/:id', auth(), awaitHandlerFactory(gigController.getBidExist)); 
+router.get('/cards', awaitHandlerFactory(gigController.getCards)); 
+router.get('/languages', awaitHandlerFactory(gigController.getLanguages)); 
+router.get('/genres', awaitHandlerFactory(gigController.getGenres)); 
+router.post('/acceptContractGigByID/:id', auth(), awaitHandlerFactory(gigController.acceptGigByID));
+router.post('/completeGigByID/:id', auth(), awaitHandlerFactory(gigController.completeGigByID));
+router.get('/getGigsByUserID/:id', auth(), awaitHandlerFactory(gigController.getCreatorGigsByUserID));
+router.get('/getBidderSuccessfullGigsByUserID/:id', auth(), awaitHandlerFactory(gigController.getBidderSuccessfullGigsByUserID));  
 
 module.exports = router;
