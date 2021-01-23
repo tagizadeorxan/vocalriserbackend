@@ -27,5 +27,8 @@ router.post('/acceptContractGigByID/:id', auth(), awaitHandlerFactory(gigControl
 router.post('/completeGigByID/:id', auth(), awaitHandlerFactory(gigController.completeGigByID));
 router.get('/getGigsByUserID/:id', auth(), awaitHandlerFactory(gigController.getCreatorGigsByUserID));
 router.get('/getBidderSuccessfullGigsByUserID/:id', auth(), awaitHandlerFactory(gigController.getBidderSuccessfullGigsByUserID));  
+router.get('/prepareContractForGig/:id', auth(), awaitHandlerFactory(gigController.prepareContractForGig));  
+
+router.post('/sendContract', auth(), awaitHandlerFactory(gigController.sendContract));  
 
 module.exports = router;

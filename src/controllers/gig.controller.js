@@ -1,15 +1,23 @@
 const GigModel = require('../models/gig.model');
+const UserModel = require('../models/user.model')
 const BidModel = require('../models/bid.model');
 const CardModel = require('../models/cards.model')
 const languages = require('../utils/languages.utils')
 const genres = require('../utils/genres.utils')
+const prepareContract = require('../utils/contract.util')
 const HttpException = require('../utils/HttpException.utils');
 const { validationResult } = require('express-validator');
 const Utils = require('../utils/helpers.utils');
+const { ContractSender } = require('../utils/helpers.utils')
+const PDFDocument = require('pdfkit');
+const fs = require('fs');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const { User } = require('../utils/userRoles.utils');
 dotenv.config();
+
+
 
 /******************************************************************************
  *                              Gig Controller
@@ -65,11 +73,11 @@ class GigController {
     getBidderSuccessfullGigsByUserID = async (req, res, next) => {
         let giglist;
 
-        giglist = await GigModel.find({ awardedUser: req.params.id, active:2 })
+        giglist = await GigModel.find({ awardedUser: req.params.id, active: 2 })
         if (!giglist.length) {
             throw new HttpException(404, 'Gig not found');
         }
-console.log(giglist)
+        console.log(giglist)
         res.send(giglist);
     }
 
@@ -174,8 +182,53 @@ console.log(giglist)
         res.send(result);
     };
 
+    prepareContractForGig = async (req, res, next) => {
+        const gig = await GigModel.findOne({ id: req.params.id });
+        if (!gig) {
+            throw new HttpException(404, 'Gig not found');
+        }
 
+        let contract = prepareContract(gig)
+        res.send({
+            contract
+        })
 
+    }
+
+    sendContract = async (req, res, next) => {
+
+        const doc = new PDFDocument();
+        
+
+        doc.pipe(fs.createWriteStream('contract.pdf'));
+
+        // Embed a font, set the font size, and render some text
+        doc 
+        .font(__dirname+'/Art Brewery.ttf')
+            .fontSize(25)
+            .text(req.body.contract, 100, 100);
+
+        doc
+            .save()
+
+        doc.end()
+
+        let awarder = await UserModel.findOne({ id: req.body.user_id, active: 1 })
+        let awarded = await UserModel.findOne({ id: req.body.awardedUser, active: 1 })
+
+        if (!awarder || !awarded) {
+            throw new HttpException(404, 'User not found');
+        }
+
+        if (awarder && awarded) {
+            console.log(awarder.email)
+            console.log(awarded.email)
+            ContractSender(awarder.email)
+            ContractSender(awarded.email)
+        }
+
+        res.json({ success: true })
+    }
 
 
     acceptGigByID = async (req, res, next) => {
