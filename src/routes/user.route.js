@@ -19,8 +19,17 @@ router.lock('/id/:id', auth(Role.Admin), awaitHandlerFactory(userController.lock
 router.get('/confirmation/:token', awaitHandlerFactory(userController.confirmUser)); // localhost:3000/api/v1/users/id/1
 router.get('/vocalists',auth() ,awaitHandlerFactory(userController.getVocalists));
 router.get('/producers',auth() ,awaitHandlerFactory(userController.getProducers));
+//main message
+router.post('/createMessage', auth(), awaitHandlerFactory(userController.createMessage));
+//each message inside main message
+router.post('/sendMessage', auth(), awaitHandlerFactory(userController.sendMessage));
+//main message by userID
+router.get('/getMessages/:id',auth() ,awaitHandlerFactory(userController.getMessages));
+//each inside main message by messageID
+router.get('/getEachMessages/:id',auth() ,awaitHandlerFactory(userController.getEachMessages));
 
-
+//removeMessage
+router.post('/deleteMessage',auth() ,awaitHandlerFactory(userController.deleteMessage));
 
 //tracks
 router.get('/tracks',auth() ,awaitHandlerFactory(userController.getAllTracks));
