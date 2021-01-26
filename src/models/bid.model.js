@@ -30,15 +30,22 @@ class BidModel {
         return result[0];
     }
 
-    create = async ({ gig_id, user_id, amount, full_name, track_url, track_title,soundslike }) => {
+    create = async ({ gig_id, user_id, amount, full_name, track_url, track_title, soundslike }) => {
         const sql = `INSERT INTO ${this.tableName}
         (gig_id, user_id, amount, full_name, track_url, track_title,soundslike) VALUES (?,?,?,?,?,?,?)`;
 
-        const result = await query(sql, [gig_id, user_id, amount, full_name, track_url, track_title,soundslike]);
-        
+        const result = await query(sql, [gig_id, user_id, amount, full_name, track_url, track_title, soundslike]);
+
         const affectedRows = result ? result.affectedRows : 0;
-        
+
         return affectedRows;
+    }
+
+    userWhereBidded = async (user_id) => {
+        const sql = `SELECT DISTINCT gig_id from bids where user_id = ${user_id}  and  gig_id IN
+        (SELECT id from gigs where active=1)`
+
+        return await query(sql)
     }
 
     update = async (params, id) => {

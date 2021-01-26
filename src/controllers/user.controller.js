@@ -1,6 +1,8 @@
 const UserModel = require('../models/user.model.js');
 const TrackModel = require('../models/track.model.js');
 const MessageModel = require('../models/message.model')
+const BidModel = require('../models/bid.model')
+const NotificationModel = require('../models//notifications.model')
 const EachMessageModel = require('../models/each.message.model')
 const HttpException = require('../utils/HttpException.utils');
 const { validationResult } = require('express-validator');
@@ -8,6 +10,7 @@ const Utils = require('../utils/helpers.utils');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const bidModel = require('../models/bid.model.js');
 dotenv.config();
 
 /******************************************************************************
@@ -187,7 +190,7 @@ class UserController {
         const result = await MessageModel.create(req.body);
         const lastInsertedID = await MessageModel.getLastInserted()
 
-       
+
         let data = {
             message_id: lastInsertedID[0].id,
             sender_id: req.body.sender,
@@ -199,8 +202,8 @@ class UserController {
         if (!result && create) {
             throw new HttpException(409, 'Something went wrong');
         }
-        
-        res.status(200).json('Message sent!');
+
+        res.send(lastInsertedID[0])
     }
 
     sendMessage = async (req, res, next) => {
@@ -217,6 +220,14 @@ class UserController {
         }
 
         res.status(200).json('Message sent!');
+    }
+
+    getWhichBidded = async (req, res, next) => {
+        const result = await BidModel.userWhereBidded(req.params.id)
+        if (!result) {
+            throw new HttpException(409, 'Something went wrong');
+        }
+        res.send(result)
     }
 
     getMessages = async (req, res, next) => {
@@ -250,6 +261,36 @@ class UserController {
         res.send('Deleted');
     }
 
+    getNotifications = async (req, res, next) => {
+        const result = await NotificationModel.find({ toUser: req.params.id, active: 0 })
+
+        if (!result) {
+            throw new HttpException(404, 'Notification not found')
+        }
+        res.send(result)
+    }
+
+    readNotification = async (req,res,next) => {
+        const update = {
+            active:1
+        }
+
+        const result = await NotificationModel.update(update,req.params.id)
+        if (!result) {
+            throw new HttpException(404, 'Notification not found')
+        }
+        res.send('Notification read')
+    }
+
+    createNotification = async (req,res,next) => {
+        const result = await NotificationModel.create(req.body)
+
+        if (!result) {
+            throw new HttpException(409, 'Something went wrong');
+        }
+
+        res.status(200).json('Notification sent!');
+    }
 
     confirmUser = async (req, res, next) => {
         const update = {

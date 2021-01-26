@@ -34,8 +34,23 @@ router.post('/deleteMessage',auth() ,awaitHandlerFactory(userController.deleteMe
 //tracks
 router.get('/tracks',auth() ,awaitHandlerFactory(userController.getAllTracks));
 
+//which gigs user bidded by userid
+router.get('/biddedGigs/:id',auth() ,awaitHandlerFactory(userController.getWhichBidded));
 
 router.post('/login', validateLogin, awaitHandlerFactory(userController.userLogin)); // localhost:3000/api/v1/users/login
+
+//get Notifications by UserID
+router.get('/getNotifications/:id',auth() ,awaitHandlerFactory(userController.getNotifications));
+
+//read notification by notificationid
+router.get('/readNotification/:id',auth() ,awaitHandlerFactory(userController.readNotification));
+
+//create Notification
+router.post('/createNotification',auth() ,awaitHandlerFactory(userController.createNotification));
+
+
+
+
 
 
 module.exports = router;

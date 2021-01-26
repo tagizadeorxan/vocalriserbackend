@@ -1,8 +1,7 @@
 const query = require('../db/db-connection');
 const { multipleColumnSet } = require('../utils/common.utils');
-const Role = require('../utils/userRoles.utils');
-class MessageModel {
-    tableName = 'messages';
+class NotificationModel {
+    tableName = 'notifications';
 
     find = async (params = {}) => {
         let sql = `SELECT * FROM ${this.tableName}`;
@@ -26,38 +25,40 @@ class MessageModel {
 
         const result = await query(sql, [...values]);
 
-        // return back the first row (user)
         return result[0];
     }
 
-    create = async ({ sender, sender_fullname, reciever, reciever_fullname,message }) => {
-        
+    create = async ({ type, fromUser, toUser, messageID = 0 }) => {
         const sql = `INSERT INTO ${this.tableName}
-        (sender, sender_fullname, reciever, reciever_fullname,message) VALUES (?,?,?,?,?)`;
+        (type, fromUser, toUser, messageID) VALUES (?,?,?,?)`;
 
-        const result = await query(sql, [sender, sender_fullname, reciever, reciever_fullname,message]);
-        
+        const result = await query(sql, [type, fromUser, toUser, messageID]);
+
         const affectedRows = result ? result.affectedRows : 0;
-        
+
         return affectedRows;
     }
 
     update = async (params, id) => {
         const { columnSet, values } = multipleColumnSet(params)
 
-        const sql = `UPDATE messages SET ${columnSet} WHERE id = ?`;
+        const sql = `UPDATE notifications SET ${columnSet} WHERE id = ?`;
 
         const result = await query(sql, [...values, id]);
 
         return result;
     }
 
-    getLastInserted = async () => {
-        const sql = `SELECT id FROM messages where id=(select max(id) from messages)`
-        const result = await query(sql)
-      
-        return result
+    confirm = async (params, id) => {
+        const { columnSet, values } = multipleColumnSet(params)
+
+        const sql = `UPDATE notifications SET ${columnSet} WHERE id = ?`;
+
+        const result = await query(sql, [...values, id]);
+
+        return result;
     }
+
 
     delete = async (id) => {
         const sql = `DELETE FROM ${this.tableName}
@@ -67,12 +68,6 @@ class MessageModel {
 
         return affectedRows;
     }
-
-    getMessage = async(id) => {
-        let sql = `SELECT * FROM ${this.tableName} WHERE  sender = ${id} OR reciever = ${id}`;
-        return await query(sql);
-
-    }
 }
 
-module.exports = new MessageModel;
+module.exports = new NotificationModel;
