@@ -19,7 +19,7 @@ router.delete('/removeBid/:id', auth(), awaitHandlerFactory(gigController.delete
 router.post('/submitBid', auth(), awaitHandlerFactory(gigController.submitBid));
 router.post('/closeGigByID/:id', auth(), awaitHandlerFactory(gigController.closeGigByID));
 router.post('/awardGigByID/:id', auth(), awaitHandlerFactory(gigController.awardGigByID));
-router.get('/bidExist/:id', auth(), awaitHandlerFactory(gigController.getBidExist)); 
+router.post('/bidExist', auth(), awaitHandlerFactory(gigController.getBidExist)); 
 router.get('/cards', awaitHandlerFactory(gigController.getCards)); 
 router.get('/languages', awaitHandlerFactory(gigController.getLanguages)); 
 router.get('/genres', awaitHandlerFactory(gigController.getGenres)); 

@@ -140,7 +140,7 @@ class GigController {
 
 
     getBidExist = async (req, res, next) => {
-        const bid = await BidModel.find({ user_id: req.params.id });
+        const bid = await BidModel.find({ user_id: req.body.user_id,gig_id:req.body.gig_id });
         if (!bid.length) {
             throw new HttpException(404, 'Bid not found');
         }
