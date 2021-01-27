@@ -52,5 +52,4 @@ router.post('/createNotification',auth() ,awaitHandlerFactory(userController.cre
 
 
 
-
 module.exports = router;

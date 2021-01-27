@@ -308,12 +308,14 @@ class UserController {
                 if (!result) {
                     throw new HttpException(404, 'User not found');
                 }
-                res.send('User confirmed');
+                res.redirect('https://vocalriserfront.herokuapp.com/');
             }
         });
 
 
     };
+
+
 
     lockUser = async (req, res, next) => {
         const update = {
@@ -386,6 +388,9 @@ class UserController {
             req.body.password = await bcrypt.hash(req.body.password, 8);
         }
     }
+
+
+
 }
 
 
