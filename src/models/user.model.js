@@ -1,5 +1,5 @@
 const query = require('../db/db-connection');
-const { multipleColumnSet } = require('../utils/common.utils');
+const { multipleColumnSet, multipleUpdateSet } = require('../utils/common.utils');
 const Role = require('../utils/userRoles.utils');
 class UserModel {
     tableName = 'users';
@@ -42,10 +42,11 @@ class UserModel {
     }
 
     update = async (params, id) => {
-        const { columnSet, values } = multipleColumnSet(params)
+        console.log(params)
+        const { columnSet, values } = multipleUpdateSet(params)
 
         const sql = `UPDATE users SET ${columnSet} WHERE id = ?`;
-
+     
         const result = await query(sql, [...values, id]);
 
         return result;

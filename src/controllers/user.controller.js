@@ -153,14 +153,9 @@ class UserController {
 
     updateUser = async (req, res, next) => {
         this.checkValidation(req);
+    
 
-        await this.hashPassword(req);
-
-        const { confirm_password, ...restOfUpdates } = req.body;
-
-        // do the update query and get the result
-        // it can be partial edit
-        const result = await UserModel.update(restOfUpdates, req.params.id);
+        const result = await UserModel.update(req.body, req.params.id);
 
         if (!result) {
             throw new HttpException(404, 'Something went wrong');
@@ -168,6 +163,7 @@ class UserController {
 
         const { affectedRows, changedRows, info } = result;
 
+        
         const message = !affectedRows ? 'User not found' :
             affectedRows && changedRows ? 'User updated successfully' : 'Updated faild';
 

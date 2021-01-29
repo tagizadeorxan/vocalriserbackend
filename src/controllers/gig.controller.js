@@ -204,7 +204,7 @@ class GigController {
 
         // Embed a font, set the font size, and render some text
         doc 
-        .font(__dirname+'/Art Brewery.ttf')
+        .font(__dirname+'./Times New Roman.ttf')
             .fontSize(25)
             .text(req.body.contract, 100, 100);
 
