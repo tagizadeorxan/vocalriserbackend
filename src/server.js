@@ -32,6 +32,9 @@ app.all('*', (req, res, next) => {
 // Error middleware
 app.use(errorMiddleware);
 
+
+app.set('view engine', 'jade')
+
 // starting the server
 app.listen(port, () =>
 

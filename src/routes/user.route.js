@@ -50,6 +50,10 @@ router.post('/createNotification',auth() ,awaitHandlerFactory(userController.cre
 
 
 
+const success = async (req,res,next) => {
+   res.render('index')
+}
+router.get('/success/:id',success)
 
 
 
