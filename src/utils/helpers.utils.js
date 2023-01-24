@@ -5,7 +5,7 @@ const nodemailer = require('nodemailer');
 const Verify = require('../utils/verify')
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  service: 'Gmail',
   auth: {
     user: process.env.GMAIL_USER,
     pass: process.env.GMAIL_PASSWORD
